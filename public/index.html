@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ዮም ሽያጭ ሲስተም</title>
+    <title>ዮም ሽያጭ ማኔጅመንት ሲስተም</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh}
@@ -13,26 +13,30 @@
         .login-box input{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:5px}
         .login-box button{width:100%;padding:12px;background:#667eea;color:white;border:none;border-radius:5px;cursor:pointer}
         .dashboard{display:none}
-        .top-bar{background:white;padding:15px 20px;display:flex;justify-content:space-between}
+        .top-bar{background:white;padding:15px 20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+        .top-bar h1{font-size:20px}
+        .user-info{display:flex;gap:10px;align-items:center}
+        .logout-btn{background:#e53e3e;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer}
         .nav-menu{background:#2d3748;padding:10px;display:flex;gap:5px;flex-wrap:wrap}
         .nav-btn{background:none;color:white;border:none;padding:8px 12px;cursor:pointer;border-radius:5px}
+        .nav-btn:hover{background:#4a5568}
         .nav-btn.active{background:#667eea}
         .content{padding:20px}
         .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:20px}
         .stat-card{background:white;padding:15px;border-radius:10px}
         .stat-card .value{font-size:24px;font-weight:bold}
-        .data-table{background:white;border-radius:10px;overflow-x:auto;padding:15px}
+        .data-table{background:white;border-radius:10px;overflow-x:auto;padding:15px;margin-top:20px}
         table{width:100%;border-collapse:collapse}
         th,td{padding:10px;text-align:left;border-bottom:1px solid #eee}
+        th{background:#f7f7f7}
         .form-container{background:white;padding:20px;border-radius:10px;margin-bottom:20px}
         .form-group{margin-bottom:15px}
-        .form-group label{display:block;margin-bottom:5px}
+        .form-group label{display:block;margin-bottom:5px;font-weight:bold}
         .form-group input,.form-group select{width:100%;padding:8px;border:1px solid #ddd;border-radius:5px}
         .btn-primary{background:#667eea;color:white;padding:10px 20px;border:none;border-radius:5px;cursor:pointer}
         .btn-danger{background:#e53e3e;color:white;padding:5px 10px;border:none;border-radius:3px;cursor:pointer}
         .btn-edit{background:#48bb78;color:white;padding:5px 10px;border:none;border-radius:3px;cursor:pointer}
         .error{color:red;text-align:center;margin-top:10px}
-        .logout-btn{background:#e53e3e;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer}
         @media (max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
     </style>
 </head>
@@ -50,14 +54,18 @@
     <div id="dashboard" class="dashboard">
         <div class="top-bar">
             <h1>ዮም ሽያጭ ማኔጅመንት</h1>
-            <div><span id="userName"></span> <button class="logout-btn" onclick="logout()">ውጣ</button></div>
+            <div class="user-info">
+                <span id="userName"></span>
+                <button class="logout-btn" onclick="logout()">ውጣ</button>
+            </div>
         </div>
         <div class="nav-menu">
-            <button class="nav-btn active" onclick="showPage('dashboard')">📊 ዳሽቦርድ</button>
+            <button class="nav-btn" onclick="showPage('dashboard')">📊 ዳሽቦርድ</button>
             <button class="nav-btn" onclick="showPage('customers')">👥 ደንበኞች</button>
             <button class="nav-btn" onclick="showPage('products')">📦 ምርቶች</button>
             <button class="nav-btn" onclick="showPage('sales')">💰 ሽያጭ</button>
             <button class="nav-btn" onclick="showPage('employees')">👨‍💼 ሰራተኞች</button>
+            <button class="nav-btn" onclick="showPage('expenses')">💸 ወጪዎች</button>
         </div>
         <div class="content" id="content"></div>
     </div>
@@ -119,6 +127,7 @@
             else if(page === 'products') await loadProducts();
             else if(page === 'sales') await loadSales();
             else if(page === 'employees') await loadEmployees();
+            else if(page === 'expenses') await loadExpenses();
         }
         
         async function loadDashboard() {
@@ -147,7 +156,7 @@
                     <button class="btn-primary" onclick="addCustomer()">አስገባ</button>
                 </div>
                 <div class="data-table"><h3>📋 የደንበኞች ዝርዝር</h3>
-                <table><thead><tr><th>ስም</th><th>ስልክ</th><th>አድራሻ</th><th>ድርጊት</th></tr></thead>
+                <td><thead><tr><th>ስም</th><th>ስልክ</th><th>አድራሻ</th><th>ድርጊት</th></tr></thead>
                 <tbody>${customers.map(c => `<tr>
                     <td>${c.name}</td>
                     <td>${c.phone || '-'}</td>
@@ -181,7 +190,7 @@
                     <button class="btn-primary" onclick="addProduct()">አስገባ</button>
                 </div>
                 <div class="data-table"><h3>📦 የምርቶች ዝርዝር</h3>
-                <tr><thead><tr><th>ስም</th><th>ዋጋ</th><th>ክምችት</th><th>ድርጊት</th></tr></thead>
+                <table><thead><tr><th>ስም</th><th>ዋጋ</th><th>ክምችት</th><th>ድርጊት</th></tr></thead>
                 <tbody>${products.map(p => `<tr>
                     <td>${p.name}</td>
                     <td>${p.selling_price} ብር</td>
@@ -235,7 +244,7 @@
                     <button class="btn-primary" onclick="createSale()">ሽያጩን አስመዝግብ</button>
                 </div>
                 <div class="data-table"><h3>💰 የሽያጭ ዝርዝር</h3>
-                <table><thead><tr><th>ተራ ቁጥር</th><th>ደንበኛ</th><th>ጠቅላላ</th><th>ቀን</th></tr></thead>
+                <tr><thead><tr><th>ተራ ቁጥር</th><th>ደንበኛ</th><th>ጠቅላላ</th><th>ቀን</th></tr></thead>
                 <tbody>${sales.map(s => `<tr>
                     <td>${s.invoice_number}</td>
                     <td>${s.customer_name || 'የገንዘብ ግዢ'}</td>
@@ -292,18 +301,26 @@
                     <div class="form-group"><label>ስም</label><input type="text" id="empName"></div>
                     <div class="form-group"><label>ስልክ</label><input type="text" id="empPhone"></div>
                     <div class="form-group"><label>ሹመት</label><input type="text" id="empPosition"></div>
+                    <div class="form-group"><label>ምድብ</label>
+                        <select id="empType">
+                            <option value="sales">የሽያጭ ሰራተኛ</option>
+                            <option value="warehouse">የመጋዘን ሰራተኛ</option>
+                            <option value="accountant">ሂሳብ ሰራተኛ</option>
+                        </select>
+                    </div>
                     <div class="form-group"><label>ደሞዝ</label><input type="number" id="empSalary"></div>
                     <button class="btn-primary" onclick="addEmployee()">አስገባ</button>
                 </div>
                 <div class="data-table"><h3>👨‍💼 የሰራተኞች ዝርዝር</h3>
-                <table><thead><tr><th>ስም</th><th>ስልክ</th><th>ሹመት</th><th>ደሞዝ</th><th>ድርጊት</th></tr></thead>
-                <tbody>${employees.map(e => `<tr>
+                <table><thead><tr><th>ስም</th><th>ስልክ</th><th>ሹመት</th><th>ምድብ</th><th>ደሞዝ</th><th>የተጠቃሚ ስም</th><th>ድርጊት</th></tr></thead>
+                <tbody>${employees.map(e => `<td>
                     <td>${e.name}</td>
                     <td>${e.phone || '-'}</td>
                     <td>${e.position || '-'}</td>
+                    <td>${e.employee_type === 'sales' ? 'የሽያጭ' : (e.employee_type === 'warehouse' ? 'መጋዘን' : 'ሂሳብ')}</td>
                     <td>${e.salary || 0} ብር</td>
-                    <td><button class="btn-danger" onclick="deleteEmployee(${e.id})">ሰርዝ</button>
-                        </td>
+                    <td>${e.username || '-'}</td>
+                    <td><button class="btn-danger" onclick="deleteEmployee(${e.id})">ሰርዝ</button></td>
                 </tr>`).join('')}</tbody></table></div>
             `;
         }
@@ -311,14 +328,98 @@
         async function addEmployee() {
             const name = document.getElementById('empName').value;
             if(!name) return alert('ስም ያስገቡ');
-            await fetchAPI('/api/employees', {
+            const res = await fetchAPI('/api/employees', {
                 method: 'POST',
-                body: JSON.stringify({ name, phone: document.getElementById('empPhone').value, position: document.getElementById('empPosition').value, salary: parseFloat(document.getElementById('empSalary').value) || 0 })
+                body: JSON.stringify({ 
+                    name, 
+                    phone: document.getElementById('empPhone').value,
+                    position: document.getElementById('empPosition').value,
+                    employee_type: document.getElementById('empType').value,
+                    salary: parseFloat(document.getElementById('empSalary').value) || 0
+                })
             });
+            const data = await res.json();
+            if(res.ok && data.username) {
+                alert(`የተጠቃሚ ስም: ${data.username}\nጊዜያዊ ይለፍ ቃል: ${data.tempPassword}`);
+            }
             loadEmployees();
         }
         
         async function deleteEmployee(id) { await fetchAPI(`/api/employees/${id}`, { method: 'DELETE' }); loadEmployees(); }
+        
+        // ==================== EXPENSES ====================
+        async function loadExpenses() {
+            const res = await fetchAPI('/api/expenses');
+            const expenses = await res.json();
+            
+            document.getElementById('content').innerHTML = `
+                <div class="form-container">
+                    <h3>➕ አዲስ ወጪ</h3>
+                    <div class="form-group">
+                        <label>ምድብ</label>
+                        <select id="expCategory">
+                            <option value="fuel">⛽ ነዳጅ</option>
+                            <option value="maintenance">🔧 ጥገና</option>
+                            <option value="salary">💰 ደሞዝ</option>
+                            <option value="rent">🏠 ኪራይ</option>
+                            <option value="other">📋 ሌላ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>ገንዘብ (ብር)</label>
+                        <input type="number" id="expAmount" placeholder="ገንዘብ">
+                    </div>
+                    <div class="form-group">
+                        <label>ማብራሪያ</label>
+                        <input type="text" id="expDesc" placeholder="ማብራሪያ">
+                    </div>
+                    <button class="btn-primary" onclick="addExpense()">አስገባ</button>
+                </div>
+                
+                <div class="data-table">
+                    <h3>📋 የወጪ ዝርዝር</h3>
+                    <table>
+                        <thead>
+                            <tr><th>ምድብ</th><th>ገንዘብ</th><th>ማብራሪያ</th><th>የመዝገበው</th><th>ቀን</th><th>ድርጊት</th></tr>
+                        </thead>
+                        <tbody>
+                            ${expenses.map(e => `
+                                <tr>
+                                    <td>${e.category === 'fuel' ? '⛽ ነዳጅ' : (e.category === 'maintenance' ? '🔧 ጥገና' : (e.category === 'salary' ? '💰 ደሞዝ' : (e.category === 'rent' ? '🏠 ኪራይ' : '📋 ሌላ')))}</td>
+                                    <td>${e.amount} ብር</td>
+                                    <td>${e.description || '-'}</td>
+                                    <td>${e.created_by_name || '-'}</td>
+                                    <td>${e.expense_date}</td>
+                                    <td><button class="btn-danger" onclick="deleteExpense(${e.id})">ሰርዝ</button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        async function addExpense() {
+            const amount = document.getElementById('expAmount').value;
+            if (!amount) return alert('ገንዘብ ያስገቡ');
+            
+            await fetchAPI('/api/expenses', {
+                method: 'POST',
+                body: JSON.stringify({
+                    category: document.getElementById('expCategory').value,
+                    amount: parseFloat(amount),
+                    description: document.getElementById('expDesc').value
+                })
+            });
+            loadExpenses();
+        }
+        
+        async function deleteExpense(id) {
+            if (confirm('እርግጠኛ ነዎት?')) {
+                await fetchAPI(`/api/expenses/${id}`, { method: 'DELETE' });
+                loadExpenses();
+            }
+        }
         
         checkAuth();
     </script>
