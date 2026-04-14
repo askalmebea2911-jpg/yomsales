@@ -349,55 +349,62 @@
         
         // ==================== EXPENSES ====================
         async function loadExpenses() {
-            const res = await fetchAPI('/api/expenses');
-            const expenses = await res.json();
-            
-            document.getElementById('content').innerHTML = `
-                <div class="form-container">
-                    <h3>➕ አዲስ ወጪ</h3>
-                    <div class="form-group">
-                        <label>ምድብ</label>
-                        <select id="expCategory">
-                            <option value="fuel">⛽ ነዳጅ</option>
-                            <option value="maintenance">🔧 ጥገና</option>
-                            <option value="salary">💰 ደሞዝ</option>
-                            <option value="rent">🏠 ኪራይ</option>
-                            <option value="other">📋 ሌላ</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>ገንዘብ (ብር)</label>
-                        <input type="number" id="expAmount" placeholder="ገንዘብ">
-                    </div>
-                    <div class="form-group">
-                        <label>ማብራሪያ</label>
-                        <input type="text" id="expDesc" placeholder="ማብራሪያ">
-                    </div>
-                    <button class="btn-primary" onclick="addExpense()">አስገባ</button>
-                </div>
-                
-                <div class="data-table">
-                    <h3>📋 የወጪ ዝርዝር</h3>
-                    <table>
-                        <thead>
-                            <tr><th>ምድብ</th><th>ገንዘብ</th><th>ማብራሪያ</th><th>የመዝገበው</th><th>ቀን</th><th>ድርጊት</th></tr>
-                        </thead>
-                        <tbody>
-                            ${expenses.map(e => `
-                                <tr>
-                                    <td>${e.category === 'fuel' ? '⛽ ነዳጅ' : (e.category === 'maintenance' ? '🔧 ጥገና' : (e.category === 'salary' ? '💰 ደሞዝ' : (e.category === 'rent' ? '🏠 ኪራይ' : '📋 ሌላ')))}</td>
-                                    <td>${e.amount} ብር</td>
-                                    <td>${e.description || '-'}</td>
-                                    <td>${e.created_by_name || '-'}</td>
-                                    <td>${e.expense_date}</td>
-                                    <td><button class="btn-danger" onclick="deleteExpense(${e.id})">ሰርዝ</button></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
+    const res = await fetchAPI('/api/expenses');
+    const expenses = await res.json();
+    
+    document.getElementById('content').innerHTML = `
+        <div class="form-container">
+            <h3>➕ አዲስ ወጪ</h3>
+            <div class="form-group">
+                <label>ምድብ</label>
+                <select id="expCategory">
+                    <option value="fuel">⛽ ነዳጅ</option>
+                    <option value="maintenance">🔧 ጥገና</option>
+                    <option value="salary">💰 ደሞዝ</option>
+                    <option value="rent">🏠 ኪራይ</option>
+                    <option value="other">📋 ሌላ</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>ገንዘብ (ብር)</label>
+                <input type="number" id="expAmount" placeholder="ገንዘብ">
+            </div>
+            <div class="form-group">
+                <label>ማብራሪያ</label>
+                <input type="text" id="expDesc" placeholder="ማብራሪያ">
+            </div>
+            <button class="btn-primary" onclick="addExpense()">አስገባ</button>
+        </div>
+        
+        <div class="data-table">
+            <h3>📋 የወጪ ዝርዝር</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ምድብ</th>
+                        <th>ገንዘብ</th>
+                        <th>ማብራሪያ</th>
+                        <th>የመዝገበው</th>
+                        <th>ቀን</th>
+                        <th>ድርጊት</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${expenses.map(e => `
+                        <tr>
+                            <td>${e.category === 'fuel' ? '⛽ ነዳጅ' : (e.category === 'maintenance' ? '🔧 ጥገና' : (e.category === 'salary' ? '💰 ደሞዝ' : (e.category === 'rent' ? '🏠 ኪራይ' : '📋 ሌላ')))}</td>
+                            <td>${e.amount} ብር</td>
+                            <td>${e.description || '-'}</td>
+                            <td>${e.created_by_name || '-'}</td>
+                            <td>${e.expense_date}</td>
+                            <td><button class="btn-danger" onclick="deleteExpense(${e.id})">ሰርዝ</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
         
         async function addExpense() {
             const amount = document.getElementById('expAmount').value;
