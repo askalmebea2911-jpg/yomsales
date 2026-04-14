@@ -382,6 +382,19 @@ app.delete('/api/employees/:id', async (req, res) => {
   res.json({ success: true });
 });
 
+// Reset employee password
+app.post('/api/employees/:id/reset-password', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  const admin = await db.get("SELECT role FROM users WHERE id = ?", req.session.userId);
+  if (admin.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+  
+  const tempPassword = 'Temp' + Math.floor(1000 + Math.random() * 9000);
+  const hashed = await bcrypt.hash(tempPassword, 10);
+  
+  await db.run("UPDATE users SET password = ? WHERE employee_id = ?", [hashed, req.params.id]);
+  res.json({ success: true, tempPassword });
+});
+
 app.get('/api/employee-types', async (req, res) => {
   const types = [
     { value: 'sales', label: 'የሽያጭ ሰራተኛ', code: 'SAL' },
