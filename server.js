@@ -392,6 +392,39 @@ app.get('/api/employee-types', async (req, res) => {
   res.json(types);
 });
 
+// ==================== EXPENSE ROUTES ====================
+app.get('/api/expenses', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  const expenses = await db.all(`
+    SELECT e.*, u.full_name as created_by_name 
+    FROM expenses e 
+    LEFT JOIN users u ON e.created_by = u.id 
+    ORDER BY e.expense_date DESC
+  `);
+  res.json(expenses);
+});
+
+app.post('/api/expenses', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  const { category, amount, description } = req.body;
+  
+  if (!category || !amount) {
+    return res.status(400).json({ error: 'ምድብ እና ገንዘብ ያስፈልጋል' });
+  }
+  
+  const result = await db.run(
+    "INSERT INTO expenses (category, amount, description, created_by) VALUES (?, ?, ?, ?)",
+    [category, amount, description || '', req.session.userId]
+  );
+  res.json({ id: result.lastID, success: true });
+});
+
+app.delete('/api/expenses/:id', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  await db.run("DELETE FROM expenses WHERE id = ?", req.params.id);
+  res.json({ success: true });
+});
+
 // ==================== DASHBOARD ====================
 app.get('/api/dashboard', async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
