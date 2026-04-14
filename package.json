@@ -1,0 +1,16 @@
+{
+  "name": "yomsales",
+  "version": "1.0.0",
+  "description": "Yom Sales Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "sqlite": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "express-session": "^1.17.3"
+  }
+}
