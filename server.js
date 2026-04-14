@@ -336,12 +336,49 @@ app.post('/api/employees', async (req, res) => {
   if (admin.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
   
   const { name, phone, position, employee_type, salary } = req.body;
+  console.log('Received:', { name, phone, position, employee_type, salary });
+  
   if (!name) return res.status(400).json({ error: 'ስም ያስፈልጋል' });
   
+  // Insert employee
   const result = await db.run(
     "INSERT INTO employees (name, phone, position, employee_type, salary) VALUES (?, ?, ?, ?, ?)",
     [name, phone || '', position || '', employee_type || 'sales', salary || 0]
   );
+  
+  let typeCode = '';
+  if (employee_type === 'sales') typeCode = 'SAL';
+  else if (employee_type === 'warehouse') typeCode = 'WRH';
+  else if (employee_type === 'accountant') typeCode = 'ACC';
+  else if (employee_type === 'admin') typeCode = 'ADM';
+  else typeCode = 'EMP';
+  
+  // Generate username
+  const username = typeCode + name.toLowerCase().replace(/\s/g, '').substring(0, 5) + result.lastID;
+  const tempPassword = 'Temp' + Math.floor(1000 + Math.random() * 9000);
+  const hashed = await bcrypt.hash(tempPassword, 10);
+  
+  let role = 'staff';
+  if (employee_type === 'admin') role = 'admin';
+  else if (employee_type === 'accountant') role = 'accountant';
+  else if (employee_type === 'warehouse') role = 'warehouse';
+  else if (employee_type === 'sales') role = 'sales';
+  
+  // Create user account
+  await db.run(
+    "INSERT INTO users (username, password, full_name, role, employee_type, employee_id) VALUES (?, ?, ?, ?, ?, ?)",
+    [username, hashed, name, role, employee_type || 'sales', result.lastID]
+  );
+  
+  // Update employee with user_id
+  const user = await db.get("SELECT id FROM users WHERE employee_id = ?", result.lastID);
+  if (user) {
+    await db.run("UPDATE employees SET user_id = ? WHERE id = ?", [user.id, result.lastID]);
+  }
+  
+  const newEmployee = await db.get("SELECT * FROM employees WHERE id = ?", result.lastID);
+  res.json({ employee: newEmployee, username, tempPassword });
+});
   
   let typeCode = '';
   if (employee_type === 'sales') typeCode = 'SAL';
